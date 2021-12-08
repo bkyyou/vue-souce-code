@@ -45,6 +45,9 @@ export class Observer {
     this.vmCount = 0
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
+      // 处理数组响应式 var hasProto = '__proto__' in {};
+      // 判断是否有 __proto__   obj.__proto__ 访问对象的原型链
+      // caniuse
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -52,6 +55,7 @@ export class Observer {
       }
       this.observeArray(value)
     } else {
+      // 处理对象响应式
       this.walk(value)
     }
   }
@@ -72,6 +76,7 @@ export class Observer {
    * Observe a list of Array items.
    */
   observeArray (items: Array<any>) {
+    // 遍历数组的每一项，对其进行观察(响应式处理)
     for (let i = 0, l = items.length; i < l; i++) {
       observe(items[i])
     }
@@ -86,6 +91,7 @@ export class Observer {
  */
 function protoAugment (target, src: Object) {
   /* eslint-disable no-proto */
+  // 用经过增强的数组原型方法，覆盖默认的原型方法，之后再执行那七个数组方法时就具有依赖通知更新的能力，以达到实现数组响应式的目的
   target.__proto__ = src
   /* eslint-enable no-proto */
 }
@@ -95,6 +101,7 @@ function protoAugment (target, src: Object) {
  * hidden properties.
  */
 /* istanbul ignore next */
+// 将增强的那七个方法直接赋值到数组对象上
 function copyAugment (target: Object, src: Object, keys: Array<string>) {
   for (let i = 0, l = keys.length; i < l; i++) {
     const key = keys[i]
@@ -139,8 +146,9 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 实例化 dep ， 一个 key 对应 一个 dep
   const dep = new Dep()
-
+  // 属性描述符
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
@@ -153,15 +161,23 @@ export function defineReactive (
     val = obj[key]
   }
 
+  // 通过 递归 的方式处理 val 为对象的情况，即处理嵌套对象
   let childOb = !shallow && observe(val)
+  console.log('childob', childOb);
+  // debugger
+  // 拦截 obj[key] 的访问 和 设置， 进行依赖收集 和 返回新的值
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
+    // 拦截 obj.key
     get: function reactiveGetter () {
+      // obj.key 的值
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
+        // 读取时进行依赖收集， 将 dep 添加 到 watcher 中，将watcher添加到dep中
         dep.depend()
         if (childOb) {
+          // 对嵌套对象
           childOb.dep.depend()
           if (Array.isArray(value)) {
             dependArray(value)
@@ -170,25 +186,34 @@ export function defineReactive (
       }
       return value
     },
+    // 拦截 obj.key = newVal 的操作
     set: function reactiveSetter (newVal) {
+      // 首先获取 oldVal
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
+      console.log('defineProperty set 1')
       /* eslint-enable no-self-compare */
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
+      console.log('defineProperty set 2')
       // #7981: for accessor properties without setter
+      // 判断是否是只读属性
       if (getter && !setter) return
+      // 这是新值，用新值替换老值
       if (setter) {
         setter.call(obj, newVal)
       } else {
         val = newVal
       }
+      // 对新值做响应式处理
       childOb = !shallow && observe(newVal)
+      // 依赖通知更新，当响应式数据更新时， 做依赖通知更新
       dep.notify()
+      console.log('defineProperty set end')
     }
   })
 }
@@ -265,6 +290,8 @@ export function del (target: Array<any> | Object, key: any) {
  * Collect dependencies on array elements when the array is touched, since
  * we cannot intercept array element access like property getters.
  */
+// // 处理嵌套对象为数组的情况
+// 处理数组选项为 对象的情况， 对其进行依赖收集, 因为前面的所有处理都没有办法对数组项为对象的元素进行依赖收集
 function dependArray (value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
     e = value[i]

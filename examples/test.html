@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // Function.prototype = {
+    //   call2: function(obj, ...arg) {
+    //     // const obj = {}
+    //     obj.fn = this;
+    //     obj.fn(...arg);
+    //     delete obj.fn;
+    //   },
+    //   apply2: function(obj, arg) {
+    //     obj.fn = this;
+    //     obj.fn(...arg);
+    //     delete obj.fn;
+    //   }
+    // }
+    Function.prototype.call2 = function(obj, ...arg) {
+      // const obj = {}
+      obj.fn = this;
+      obj.fn(...arg);
+      delete obj.fn;
+    }
+    Function.prototype.apply2 = function(obj, arg) {
+      obj.fn = this;
+      obj.fn(...arg);
+      delete obj.fn;
+    }
+    const a = 1;
+    const obj = {
+      a: 2,
+    }
+    function fun() {
+      console.log(this.a);
+    }
+    fun.call2(obj);
+  </script>
+</body>
+</html>

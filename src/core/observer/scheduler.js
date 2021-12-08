@@ -69,7 +69,9 @@ if (inBrowser && !isIE) {
  * Flush both queues and run the watchers.
  */
 function flushSchedulerQueue () {
+  console.log(122223333)
   currentFlushTimestamp = getNow()
+  // flushing 置为 true， 表示现在的 watcher 队列正在刷新
   flushing = true
   let watcher, id
 
@@ -85,13 +87,20 @@ function flushSchedulerQueue () {
 
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
+  // for 循环遍历 watcher 队列， 依次执行 watcher 的 run 方法
+  // queue.length 没有被缓存的原因： 刷新队列的时候可能会持续不断放入新的 watcher
   for (index = 0; index < queue.length; index++) {
+    // 拿出当前索引的 watcher
     watcher = queue[index]
+    // 首先执行 before 钩子
     if (watcher.before) {
       watcher.before()
     }
+    // 清空缓存，表示当前 watcher 已经被执行，当该 watcher 再次入对时就可以进来
     id = watcher.id
     has[id] = null
+    // 执行 watcher.run 方法
+    console.log('222222-----')
     watcher.run()
     // in dev build, check and stop circular updates.
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
@@ -163,11 +172,16 @@ function callActivatedHooks (queue) {
  */
 export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
+  // 判重， watcher 不会重复入队
   if (has[id] == null) {
+    // 缓存一下， 置为 true
     has[id] = true
     if (!flushing) {
+      // 如果 flushing = fale, 表示当前 watcher 没有再 被 刷新，watcher 直接入队
       queue.push(watcher)
     } else {
+      // watcher 队列已经再被刷新了，这时候 watcher 入队就需要特殊操作
+      // 保证 watcher 入队后， 刷新中 watcher 队列 仍然是有序的
       // if already flushing, splice the watcher based on its id
       // if already past its id, it will be run next immediately.
       let i = queue.length - 1
@@ -178,12 +192,16 @@ export function queueWatcher (watcher: Watcher) {
     }
     // queue the flush
     if (!waiting) {
+      // waiting 为 false ，表示当前浏览器的异步任务队列中 没有 flushScheulerQueue 函数
       waiting = true
 
       if (process.env.NODE_ENV !== 'production' && !config.async) {
+        // 同步执行， 直接去刷新 watcher 队列
+        // 性能就会大大降低
         flushSchedulerQueue()
         return
       }
+      // 大家熟悉 的 nextTick， this.$nextTick 或者 Vue.nextTick
       nextTick(flushSchedulerQueue)
     }
   }

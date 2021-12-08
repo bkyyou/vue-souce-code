@@ -6,17 +6,139 @@
 </head>
 <body>
   <div id="app">
-    {{ msg }}
+    <!-- {{ obj.a }} -->
+    <div>{{printMsg}}</div>
+    <!-- <div>{{printMsg}}</div>
+    <div>{{test()}}</div>
+    <div>{{test()}}</div> -->
+    <comp :aaa="222"></comp>
+    <div>{{msg}}</div>
   </div>
   <script src="../dist/vue.js"></script>
   <script>
+    // Vue.component('comp', {
+    //   template: `
+    //     <div>{{aaa}}</div>
+    //   `,
+    //   props: ['aaa'],
+    //   mounted() {
+    //     // setTimeout(() => {
+    //     //   this.aaa = 444;
+    //     // }, 2000);
+    //   }
+    // })
     // debugger
     new Vue({
       el: '#app',
       data: {
-        msg: 'hello vue'
+        msg: 'hello vue',
+        obj: {
+          a: {a: 1}
+        },
+        arr: [1,2,3]
+      },
+      computed: {
+        printMsg: function() {
+          console.log('********', 'computed')
+          return `${this.msg} computed`
+        }
+      },
+      // methods: {
+      //   test() {
+      //     console.log('********', 'methods')
+        
+      //     return `${this.msg} methods`
+      //   }
+      // },
+      mounted() {
+        setTimeout(() => {
+          debugger
+          // this.obj.a.a = 2;
+          this.msg = 2;
+          // this.arr.push(2)
+        }, 2000);
       }
     })
+
+    /**
+     * new Function => 实例
+    */
+
+    // const obj = {};
+    // var a = 1;
+    // function fun(...arg) {
+    //   console.log('arg', arg);
+    // }
+
+    // fun(a, 2, 3, 4);
+
+    var  a = [1, 2, 3];
+    var b = a.push(4);
+    console.log('b,', b);
+
+
+    // Object.defineProperty(obj, 'a', {
+    //   get() {
+    //     console.log('get')
+    //   },
+    //   set(val) {
+    //     console.log('set')
+    //     descripor.set(val)
+    //   }
+    // })
+
+    // const descripor = Object.getOwnPropertyDescriptor(obj, 'a');
+
+    // console.log('descripor', descripor);
+
+    // obj.a = 2;
+
+    // setTimeout(() => {
+    //   descripor.set(3);
+    // }, 3000);
+    
+// function defineReactive (
+//   obj: Object,
+//   key: string,
+//   val: any,
+//   customSetter?: ?Function,
+//   shallow?: boolean
+// ) {
+
+
+//   // debugger
+//   Object.defineProperty(obj, key, {
+//     enumerable: true,
+//     configurable: true,
+//     get: function reactiveGetter () {
+//       const value = val
+//       return value
+//     },
+//     set: function reactiveSetter (newVal) {
+//       const value = val
+//       if (newVal === value || (newVal !== newVal && value !== value)) {
+//         return
+//       }
+
+//         val = newVal
+//     }
+//   })
+// }
+
+// var obj = {}
+// Object.defineProperty(obj, 'key', {
+//     enumerable: true,
+//     configurable: true,
+//     get: function reactiveGetter () {
+//       console.log(222222+'---')
+//       return this.a;
+//     },
+//     set: function reactiveSetter (newVal) {
+//       this.a = newVal;
+//     }
+//   })
+//   obj.key = 1;
+  // console.log('obj.key', obj.key);
   </script>
 </body>
 </html>
