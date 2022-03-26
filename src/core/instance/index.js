@@ -17,9 +17,21 @@ function Vue (options) {
 }
 
 initMixin(Vue)
+/**
+ * $data $props $set $del $watch 
+ */
 stateMixin(Vue)
+/**
+ * $on $emit $once $off
+ */
 eventsMixin(Vue)
+/**
+ * _update $destory $forceUpdate
+ */
 lifecycleMixin(Vue)
+/**
+ * renderHelper $nextTick _render
+ */
 renderMixin(Vue)
 
 export default Vue

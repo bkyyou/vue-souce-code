@@ -14,11 +14,14 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+// $mount 做备份
 const mount = Vue.prototype.$mount
+// 覆写 $mount
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  // 得到挂载点
   el = el && query(el)
 
   /* istanbul ignore if */
@@ -31,10 +34,17 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  /**
+   * 选项中没有 render
+   * {
+   *  render: (h) => h(App)
+   * }
+   */
   if (!options.render) {
     let template = options.template
     if (template) {
       if (typeof template === 'string') {
+        // 以 # 开头说明是 id 选择器  没用过， 厉害了
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
           /* istanbul ignore if */
@@ -61,12 +71,15 @@ Vue.prototype.$mount = function (
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
-
+      // debugger
       const { render, staticRenderFns } = compileToFunctions(template, {
+        // 标记元素在 HTML 模板字符串中的开始和结束索引位置
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
         shouldDecodeNewlinesForHref,
+        // 界定符， {{}}
         delimiters: options.delimiters,
+        // 是否保留注释
         comments: options.comments
       }, this)
       options.render = render

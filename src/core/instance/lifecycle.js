@@ -56,19 +56,25 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+  // 组件初次渲染和更新的一个入口
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
+    // 老的 vnode
     const prevVnode = vm._vnode
     const restoreActiveInstance = setActiveInstance(vm)
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
+      // 老的 vnode 不存在，说明是首次渲染
+      // patch 阶段， patch diff 算法
       // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
+      // 老的 vnode 是存在， 表示后续更新
       // updates
+      // 更新阶段， path 算法，新老节点比较
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()
@@ -103,10 +109,12 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._isBeingDestroyed = true
     // remove self from parent
     const parent = vm.$parent
+    // 将自己从父组件的 children 属性中移除
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
     }
     // teardown watchers
+    // 监听移除
     if (vm._watcher) {
       vm._watcher.teardown()
     }
@@ -138,6 +146,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// $mounted 会被调用
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -186,9 +195,10 @@ export function mountComponent (
       measure(`vue ${name} patch`, startTag, endTag)
     }
   } else {
+    // 读的时候触发依赖收集
     // 负责更新组件
     updateComponent = () => {
-      // 执行 _update 进入更新阶段， 首先先执行 _render, 将组件变为 VNode 
+      // 执行 _update 进入更新阶段， 首先先执行 _render, 将组件变为 VNode, 也进行初始化 
       vm._update(vm._render(), hydrating)
     }
   }
@@ -336,6 +346,7 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
   }
 }
 
+// 以 @hook:mounted
 export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
@@ -343,10 +354,14 @@ export function callHook (vm: Component, hook: string) {
   const info = `${hook} hook`
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
+      // 通过 invoke 调用生命周期方法
       invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
+  // 在 $on 绑定的时候 设置 _hasHookEvent
   if (vm._hasHookEvent) {
+    // 通过 $event 方法触发 hook:mounted 事件
+    // 执行 vm_events[hook:mounted] 数组中所有的处理函数
     vm.$emit('hook:' + hook)
   }
   popTarget()

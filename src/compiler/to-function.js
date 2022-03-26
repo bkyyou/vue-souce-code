@@ -22,11 +22,15 @@ export function createCompileToFunctionFn (compile: Function): Function {
   const cache = Object.create(null)
 
   return function compileToFunctions (
+    // 字符串模板
     template: string,
+    // 编译选项
     options?: CompilerOptions,
+    // 组件实例
     vm?: Component
   ): CompiledFunctionResult {
     options = extend({}, options)
+    // 日志
     const warn = options.warn || baseWarn
     delete options.warn
 
@@ -49,6 +53,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // check cache
+    // 从缓存中获取编译结果
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
@@ -56,9 +61,13 @@ export function createCompileToFunctionFn (compile: Function): Function {
       return cache[key]
     }
 
-    // compile
+    // compile 执行编译函数，得到编译结果
     const compiled = compile(template, options)
+    console.log('template', template);
+    console.log('options', options);
+    console.log('compiled', compiled);
 
+    // 检查编译过程中所有的 error 和 tip
     // check compilation errors/tips
     if (process.env.NODE_ENV !== 'production') {
       if (compiled.errors && compiled.errors.length) {
@@ -87,10 +96,14 @@ export function createCompileToFunctionFn (compile: Function): Function {
       }
     }
 
+    // 编译结果，
+    // compiled.render 字符串 是一个可执行函数的字符串
     // turn code into functions
     const res = {}
     const fnGenErrors = []
+    // 通过 new Function 将字符串转换成函数
     res.render = createFunction(compiled.render, fnGenErrors)
+    // 将静态节点的函数字符串转换成可执行函数
     res.staticRenderFns = compiled.staticRenderFns.map(code => {
       return createFunction(code, fnGenErrors)
     })
@@ -108,7 +121,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
         )
       }
     }
-
+    console.log('to-function res', res);
     return (cache[key] = res)
   }
 }

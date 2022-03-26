@@ -180,6 +180,7 @@ export function queueWatcher (watcher: Watcher) {
       // 如果 flushing = fale, 表示当前 watcher 没有再 被 刷新，watcher 直接入队
       queue.push(watcher)
     } else {
+      // 队列已经再刷新？？？ 队列已经在刷新 watcher 为什么还在更新 todo？？？ 就是为什么还会执行 queueWatcher 这个方法
       // watcher 队列已经再被刷新了，这时候 watcher 入队就需要特殊操作
       // 保证 watcher 入队后， 刷新中 watcher 队列 仍然是有序的
       // if already flushing, splice the watcher based on its id

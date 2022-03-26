@@ -66,6 +66,7 @@ function prependModifierMarker (symbol: string, name: string, dynamic?: boolean)
     : symbol + name // mark the event as captured
 }
 
+// 处理修饰符
 export function addHandler (
   el: ASTElement,
   name: string,
@@ -93,10 +94,13 @@ export function addHandler (
   // normalize click.right and click.middle since they don't actually fire
   // this is technically browser-specific, but at least for now browsers are
   // the only target envs that have right/middle clicks.
+  // 处理鼠标中键， 右键
   if (modifiers.right) {
     if (dynamic) {
+      // 是否是动态属性，属性名为 click 时， name 为 contextmenu， 否则就为 name 本身
       name = `(${name})==='click'?'contextmenu':(${name})`
     } else if (name === 'click') {
+      // 非动态的情况
       name = 'contextmenu'
       delete modifiers.right
     }
@@ -108,9 +112,12 @@ export function addHandler (
     }
   }
 
+  // 分别处理 capture， once  passive 修饰符， 在名称加一些前缀加标识
   // check capture modifier
   if (modifiers.capture) {
     delete modifiers.capture
+    // 动态属性： _p(attrName, !)
+    // 静态属性： !attrName
     name = prependModifierMarker('!', name, dynamic)
   }
   if (modifiers.once) {
@@ -123,19 +130,23 @@ export function addHandler (
     name = prependModifierMarker('&', name, dynamic)
   }
 
+  // 处理事件
   let events
   if (modifiers.native) {
+    // native 修饰，原生事件
     delete modifiers.native
     events = el.nativeEvents || (el.nativeEvents = {})
   } else {
     events = el.events || (el.events = {})
   }
 
+  // {value, dyanmic, start, end, modifiers}
   const newHandler: any = rangeSetItem({ value: value.trim(), dynamic }, range)
   if (modifiers !== emptyObject) {
     newHandler.modifiers = modifiers
   }
 
+  // events[name] = [handler1, hander2, ...]
   const handlers = events[name]
   /* istanbul ignore if */
   if (Array.isArray(handlers)) {

@@ -163,7 +163,7 @@ export function defineReactive (
 
   // 通过 递归 的方式处理 val 为对象的情况，即处理嵌套对象
   let childOb = !shallow && observe(val)
-  console.log('childob', childOb);
+  // console.log('childob', childOb);
   // debugger
   // 拦截 obj[key] 的访问 和 设置， 进行依赖收集 和 返回新的值
   Object.defineProperty(obj, key, {
@@ -194,12 +194,12 @@ export function defineReactive (
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
-      console.log('defineProperty set 1')
+      // console.log('defineProperty set 1')
       /* eslint-enable no-self-compare */
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
-      console.log('defineProperty set 2')
+      // console.log('defineProperty set 2')
       // #7981: for accessor properties without setter
       // 判断是否是只读属性
       if (getter && !setter) return
@@ -213,7 +213,7 @@ export function defineReactive (
       childOb = !shallow && observe(newVal)
       // 依赖通知更新，当响应式数据更新时， 做依赖通知更新
       dep.notify()
-      console.log('defineProperty set end')
+      // console.log('defineProperty set end')
     }
   })
 }
@@ -223,34 +223,64 @@ export function defineReactive (
  * triggers change notification if the property doesn't
  * already exist.
  */
+/**
+ * {
+ *  data() {
+ *    return {
+ *      key1:val,
+ *      key3:{
+ *        key333: val
+ *      },
+ *      arr: [1,2,3,{}]
+ *    }
+ *  },
+ *  methods: {
+ *    change: {
+ *      this.key2 = 111 // 不具备响应式能力
+ *      Vue.set(this, 'key2', 111) // 具备响应式能力  这是可以的吗？？ 和官方文档不符合呀， 实验过了，不可以
+ *      this.arr[0] = 111 // 不具备响应式能力
+ *      Vue.set(this.arr, 0, 111) // 具备响应式能力
+ 
+ *    }
+ *  }
+ * 
+ * }
+ */
 export function set (target: Array<any> | Object, key: any, val: any): any {
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 处理数组 Vue.set(arr, idx, val)
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
+    // 利用数组的 splice 方式实现
     target.splice(key, 1, val)
     return val
   }
+  // 处理对象情况, key 已经在对象上
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
   const ob = (target: any).__ob__
+  // todo  这是啥意思 这个是什么时候警告
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
-    )
+      )
     return val
   }
+  // 如果设置的对象不是响应式数据，可以设置，但不具备响应式能力
   if (!ob) {
     target[key] = val
     return val
   }
+  // 对新属性设置 getter 和 setting ， 读取时收集依赖， 更新时触发依赖通知更新
   defineReactive(ob.value, key, val)
+  // 直接通知依更新通知
   ob.dep.notify()
   return val
 }
@@ -264,6 +294,7 @@ export function del (target: Array<any> | Object, key: any) {
   ) {
     warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 数组，还是利用 splice 方法实现删除元素
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
     return
@@ -276,13 +307,16 @@ export function del (target: Array<any> | Object, key: any) {
     )
     return
   }
+  // 处理对象的情况
   if (!hasOwn(target, key)) {
     return
   }
+  // 使用 delete 操作符来删除对象上的属性
   delete target[key]
   if (!ob) {
     return
   }
+  // 触发依赖通知更新
   ob.dep.notify()
 }
 

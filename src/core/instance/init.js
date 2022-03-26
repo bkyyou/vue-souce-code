@@ -50,7 +50,7 @@ export function initMixin (Vue: Class<Component>) {
        *   2、{ components: { xx } } 方式注册的局部组件在执行编译器生成的 render 函数时做了选项合并， 会合并全局配置项到局部配置项中， 包括根组件中的 components 配置
        */
       // 3. 根组件走这里，只做了一件事情选项合并，将全局配置选项合并到根组件的局部配置
-      console.log('vm.constructor', vm.constructor)
+      // console.log('vm.constructor', vm.constructor)
       // console.log('vm.constructor', vm.constructor.super)
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
@@ -132,7 +132,8 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   // 从构造函数上获取选项
   let options = Ctor.options
-  console.log('Ctor.super', Ctor.super);
+  // console.log('Ctor.super', Ctor.super);
+  // todo 什么时候有基类
   if (Ctor.super) { // 构造函数上有 super 属性，说明有基类
     const superOptions = resolveConstructorOptions(Ctor.super)
     // 缓存

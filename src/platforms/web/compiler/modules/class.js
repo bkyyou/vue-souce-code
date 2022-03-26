@@ -7,12 +7,15 @@ import {
   baseWarn
 } from 'compiler/helpers'
 
+// 处理元素上的静态和动态的属性， 得到 staticClass  和 classBinding
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
+  // 获取 class 属性值
   const staticClass = getAndRemoveAttr(el, 'class')
   if (process.env.NODE_ENV !== 'production' && staticClass) {
     const res = parseText(staticClass, options.delimiters)
     if (res) {
+      // <div class="{{ className }}"></div> 应该替换为 <div :class="className"></div>
       warn(
         `class="${staticClass}": ` +
         'Interpolation inside attributes has been removed. ' +
@@ -22,9 +25,12 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
       )
     }
   }
+  // 静态的 class
   if (staticClass) {
+    // el.staticClass = className
     el.staticClass = JSON.stringify(staticClass)
   }
+  // 处理 <div :class="{{className}}"></div>
   const classBinding = getBindingAttr(el, 'class', false /* getStatic */)
   if (classBinding) {
     el.classBinding = classBinding

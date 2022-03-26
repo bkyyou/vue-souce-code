@@ -7,9 +7,12 @@ import { createCompileToFunctionFn } from './to-function'
 export function createCompilerCreator (baseCompile: Function): Function {
   return function createCompiler (baseOptions: CompilerOptions) {
     function compile (
+      // 模板字符串
       template: string,
+      // 编译选项
       options?: CompilerOptions
     ): CompiledResult {
+      // 平台特有的编译选项，比如 web 平台，一平台特有的编译选项为原型创建最终的编译配置
       const finalOptions = Object.create(baseOptions)
       const errors = []
       const tips = []
@@ -18,6 +21,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
         (tip ? tips : errors).push(msg)
       }
 
+      // 合并 options 配置和 baseOptions, 将两者合并到 finalOptions 上
       if (options) {
         if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
           // $flow-disable-line
@@ -58,12 +62,15 @@ export function createCompilerCreator (baseCompile: Function): Function {
 
       finalOptions.warn = warn
 
+      // 执行 baseCompile 得到编译结果  编译核心
       const compiled = baseCompile(template.trim(), finalOptions)
       if (process.env.NODE_ENV !== 'production') {
         detectErrors(compiled.ast, warn)
       }
+      // 执行期间产生的错误和提示
       compiled.errors = errors
       compiled.tips = tips
+      // 返回编译结果
       return compiled
     }
 

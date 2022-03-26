@@ -1,144 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Vue 源码解读</title>
-</head>
-<body>
-  <div id="app">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vue 源码解读</title>
+  </head>
+  <body>
     <!-- {{ obj.a }} -->
-    <div>{{printMsg}}</div>
+    <!-- <div>111</div>
+  <div>{{printMsg}}</div> -->
     <!-- <div>{{printMsg}}</div>
-    <div>{{test()}}</div>
-    <div>{{test()}}</div> -->
-    <comp :aaa="222"></comp>
-    <div>{{msg}}</div>
-  </div>
-  <script src="../dist/vue.js"></script>
-  <script>
-    // Vue.component('comp', {
-    //   template: `
-    //     <div>{{aaa}}</div>
-    //   `,
-    //   props: ['aaa'],
-    //   mounted() {
-    //     // setTimeout(() => {
-    //     //   this.aaa = 444;
-    //     // }, 2000);
-    //   }
-    // })
-    // debugger
-    new Vue({
-      el: '#app',
-      data: {
-        msg: 'hello vue',
-        obj: {
-          a: {a: 1}
+  <div>{{test()}}</div>
+  <div>{{test()}}</div> -->
+    <div id="app" :class="'111'">
+      <div class="cla">{{msg}}</div>
+      <div class="cla">111</div>
+    </div>
+    <!-- <div  v-for="item in arr" class="cla">{{item}}</div> -->
+    <!-- <comp @click="handleClick" v-model="val" :aaa="222"></comp> -->
+    <!-- <input type="text" @input="handleInput('aaa', $event.target.value)">
+  <div v-pre>{{msg}}</div>
+  <div>???msg??? ???</div> -->
+    <script src="../dist/vue.js"></script>
+    <script>
+      // const app = document.getElementById("app");
+      // const appHtml = app.innerHTML;
+      // console.log(appHtml.match(/^\s*/)[0].length);
+
+      Vue.component("comp", {
+        name: "comp1",
+        // render: (h) => {
+        //   return createElement(
+        //     'h' + 1,   // 标签名称
+        //     '1' // 子节点数组
+        //   )
+        // },
+        template: `
+        <div>
+        <div>{{aaa}}</div>
+        <input :value="value" @input="$emit('input', $event.target.value)">
+        </div>
+      `,
+        props: ["aaa", "value"],
+        mounted() {
+          setTimeout(() => {
+            // this.aaa = 444;
+            // console.log('this', this)
+            // console.log('emit')
+            // this.$emit('click')
+          }, 2000);
         },
-        arr: [1,2,3]
-      },
-      computed: {
-        printMsg: function() {
-          console.log('********', 'computed')
-          return `${this.msg} computed`
-        }
-      },
-      // methods: {
-      //   test() {
-      //     console.log('********', 'methods')
-        
-      //     return `${this.msg} methods`
+        methods: {
+          handleClick() {
+            console.log("comp click");
+          },
+        },
+      });
+      // Vue.component('comp1', {
+      //   name: 'comp2',
+      //   template: `
+      //     <div>
+      //     <div>{{aaa}}</div>
+      //     <input :value="value" @input="$emit('input', $event.target.value)">
+      //     </div>
+      //   `,
+      // })
+      // debugger
+      new Vue({
+        el: "#app",
+        // delimiters: ["???", "???"],
+        data: {
+          msg: "hello vue",
+          obj: {
+            a: { a: 1 },
+          },
+          arr: [1, 2, 3],
+          val: 0,
+        },
+        computed: {
+          printMsg: function () {
+            console.log("********", "computed");
+            return `${this.msg} computed`;
+          },
+        },
+        methods: {
+          test() {
+            console.log("********", "methods");
+            return `${this.msg} methods`;
+          },
+          handleClick($event) {
+            console.log("handleClick", $event);
+          },
+          handleInput($event) {
+            console.log("hanldInput", arguments);
+          },
+        },
+        mounted() {
+          setTimeout(() => {
+            // debugger
+            // this.obj.a.a = 2;
+            // this.msg = 2;
+            // this.arr.push(2)
+            // this.$set(this, 'a', 1);
+            // console.log('parent');
+            // console.log(this.bus);
+            // this.$emit('click')
+          }, 5000);
+        },
+      });
+
+      /**
+       * new Function => 实例
+       */
+
+      // const obj = {};
+      // var a = 1;
+      // function fun(...arg) {
+      //   console.log('arg', arg);
+      // }
+
+      // fun(a, 2, 3, 4);
+
+      // var  a = [1, 2, 3];
+      // var b = a.push(4);
+      // console.log('b,', b);
+
+      // Object.defineProperty(obj, 'a', {
+      //   get() {
+      //     console.log('get')
+      //   },
+      //   set(val) {
+      //     console.log('set')
+      //     descripor.set(val)
       //   }
-      // },
-      mounted() {
-        setTimeout(() => {
-          debugger
-          // this.obj.a.a = 2;
-          this.msg = 2;
-          // this.arr.push(2)
-        }, 2000);
-      }
-    })
+      // })
 
-    /**
-     * new Function => 实例
-    */
+      // const descripor = Object.getOwnPropertyDescriptor(obj, 'a');
 
-    // const obj = {};
-    // var a = 1;
-    // function fun(...arg) {
-    //   console.log('arg', arg);
-    // }
+      // console.log('descripor', descripor);
 
-    // fun(a, 2, 3, 4);
+      // obj.a = 2;
 
-    var  a = [1, 2, 3];
-    var b = a.push(4);
-    console.log('b,', b);
+      // setTimeout(() => {
+      //   descripor.set(3);
+      // }, 3000);
 
+      // function defineReactive (
+      //   obj: Object,
+      //   key: string,
+      //   val: any,
+      //   customSetter?: ?Function,
+      //   shallow?: boolean
+      // ) {
 
-    // Object.defineProperty(obj, 'a', {
-    //   get() {
-    //     console.log('get')
-    //   },
-    //   set(val) {
-    //     console.log('set')
-    //     descripor.set(val)
-    //   }
-    // })
+      //   // debugger
+      //   Object.defineProperty(obj, key, {
+      //     enumerable: true,
+      //     configurable: true,
+      //     get: function reactiveGetter () {
+      //       const value = val
+      //       return value
+      //     },
+      //     set: function reactiveSetter (newVal) {
+      //       const value = val
+      //       if (newVal === value || (newVal !== newVal && value !== value)) {
+      //         return
+      //       }
 
-    // const descripor = Object.getOwnPropertyDescriptor(obj, 'a');
+      //         val = newVal
+      //     }
+      //   })
+      // }
 
-    // console.log('descripor', descripor);
+      // var obj = {}
+      // Object.defineProperty(obj, 'key', {
+      //     enumerable: true,
+      //     configurable: true,
+      //     get: function reactiveGetter () {
+      //       console.log(222222+'---')
+      //       return this.a;
+      //     },
+      //     set: function reactiveSetter (newVal) {
+      //       this.a = newVal;
+      //     }
+      //   })
+      //   obj.key = 1;
+      // console.log('obj.key', obj.key);
 
-    // obj.a = 2;
+      // 定投不算
 
-    // setTimeout(() => {
-    //   descripor.set(3);
-    // }, 3000);
-    
-// function defineReactive (
-//   obj: Object,
-//   key: string,
-//   val: any,
-//   customSetter?: ?Function,
-//   shallow?: boolean
-// ) {
-
-
-//   // debugger
-//   Object.defineProperty(obj, key, {
-//     enumerable: true,
-//     configurable: true,
-//     get: function reactiveGetter () {
-//       const value = val
-//       return value
-//     },
-//     set: function reactiveSetter (newVal) {
-//       const value = val
-//       if (newVal === value || (newVal !== newVal && value !== value)) {
-//         return
-//       }
-
-//         val = newVal
-//     }
-//   })
-// }
-
-// var obj = {}
-// Object.defineProperty(obj, 'key', {
-//     enumerable: true,
-//     configurable: true,
-//     get: function reactiveGetter () {
-//       console.log(222222+'---')
-//       return this.a;
-//     },
-//     set: function reactiveSetter (newVal) {
-//       this.a = newVal;
-//     }
-//   })
-//   obj.key = 1;
-  // console.log('obj.key', obj.key);
-  </script>
-</body>
+      // 白酒 一只
+      // 医疗 和 医药
+      // 半导体 两只
+      // 光伏 一只
+      // 消费一只
+      // 新能源
+      // 农业
+    </script>
+  </body>
 </html>

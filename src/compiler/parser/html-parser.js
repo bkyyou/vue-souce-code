@@ -52,6 +52,7 @@ function decodeAttr (value, shouldDecodeNewlines) {
 }
 
 export function parseHTML (html, options) {
+  // stack 存放的是标签的对象属性 { tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end }
   const stack = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
@@ -65,10 +66,12 @@ export function parseHTML (html, options) {
       let textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
+        // <!-- xx -->
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
+            // 是否保留注释
             if (options.shouldKeepComment) {
               options.comment(html.substring(4, commentEnd), index, index + commentEnd + 3)
             }
@@ -77,7 +80,10 @@ export function parseHTML (html, options) {
           }
         }
 
+
+        // todo 什么时候会有 条件注释 和 doctype 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+        // 处理条件注释
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
 
@@ -87,6 +93,7 @@ export function parseHTML (html, options) {
           }
         }
 
+        // <!DOCTYPE html>
         // Doctype:
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
@@ -94,7 +101,9 @@ export function parseHTML (html, options) {
           continue
         }
 
+        // 
         // End tag:
+        // console.log('html-parser endTag', endTag);
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -104,6 +113,8 @@ export function parseHTML (html, options) {
         }
 
         // Start tag:
+        // 得到结果  {tagName, attrs: [xx], start}
+        // debugger
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
@@ -117,6 +128,7 @@ export function parseHTML (html, options) {
       let text, rest, next
       if (textEnd >= 0) {
         rest = html.slice(textEnd)
+        // <text
         while (
           !endTag.test(rest) &&
           !startTagOpen.test(rest) &&
@@ -132,6 +144,7 @@ export function parseHTML (html, options) {
         text = html.substring(0, textEnd)
       }
 
+      // text
       if (textEnd < 0) {
         text = html
       }
@@ -144,9 +157,11 @@ export function parseHTML (html, options) {
         options.chars(text, index - text.length, index)
       }
     } else {
+      // 在处理 script style textarea 的结束标签
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
       const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
+      // rest 是 处理 <script>conetent</script>
       const rest = html.replace(reStackedTag, function (all, text, endTag) {
         endTagLength = endTag.length
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
@@ -194,7 +209,11 @@ export function parseHTML (html, options) {
       }
       advance(start[0].length)
       let end, attr
+      // console.log('html-parser attribute', attribute);
+      // console.log('html-parser attr', html.match(attribute));
+      // debugger
       while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
+        // console.log('html-parser attr', attr)
         attr.start = index
         advance(attr[0].length)
         attr.end = index
@@ -204,6 +223,7 @@ export function parseHTML (html, options) {
         match.unarySlash = end[1]
         advance(end[0].length)
         match.end = index
+        // console.log('html-parser match', match);
         return match
       }
     }
@@ -226,6 +246,7 @@ export function parseHTML (html, options) {
 
     const l = match.attrs.length
     const attrs = new Array(l)
+    // attrs = [{name: attrName, value: attrValue, start, end}, ...]
     for (let i = 0; i < l; i++) {
       const args = match.attrs[i]
       const value = args[3] || args[4] || args[5] || ''
@@ -242,6 +263,7 @@ export function parseHTML (html, options) {
       }
     }
 
+    // 非自闭合标签
     if (!unary) {
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end })
       lastTag = tagName
@@ -256,7 +278,7 @@ export function parseHTML (html, options) {
     let pos, lowerCasedTagName
     if (start == null) start = index
     if (end == null) end = index
-
+    
     // Find the closest opened tag of the same type
     if (tagName) {
       lowerCasedTagName = tagName.toLowerCase()

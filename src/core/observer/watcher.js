@@ -78,7 +78,7 @@ export default class Watcher {
       : ''
     // parse expression for getter
     if (typeof expOrFn === 'function') {
-      this.getter = expOrFn
+      this.getter = expOrFn // expOrFn updateComponent 方法
     } else {
       // 传递 key 进来，this.key 
       this.getter = parsePath(expOrFn)
@@ -116,7 +116,7 @@ export default class Watcher {
       // 主要是执行传进来的函数
       // 执行实例化 watcher 时传递进来的 第二个参数
       // 有可能是一个 函数， 比如实例化渲染 watcher 时传递 的 updateComponent 函数
-      // 用户 watcher， 可能传递 是一个 key， 也可能读取 this.key 的函数
+      // 用户 watcher， 可能传递 是一个 key， 也可能读取 this.key 的函数 传进来 key 是啥操作？？？ todo
       // 触发读取操作， 被 setter 拦截， 进行依赖收集
       value = this.getter.call(vm, vm)
     } catch (e) {
@@ -215,9 +215,12 @@ export default class Watcher {
         const oldValue = this.value
         this.value = value
         if (this.user) {
+          // 用户 watcher， 在执行一下 watch 回调
           const info = `callback for watcher "${this.expression}"`
           invokeWithErrorHandling(this.cb, this.vm, [value, oldValue], this.vm, info)
         } else {
+          // 在执行一下 watch 回调
+          // watch(() => {}, (val, oldVal) => {}) todo ???
           this.cb.call(this.vm, value, oldValue)
         }
       }

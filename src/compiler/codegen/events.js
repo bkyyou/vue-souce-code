@@ -56,21 +56,29 @@ export function genHandlers (
   events: ASTElementHandlers,
   isNative: boolean
 ): string {
+  // 前缀是 nativeOn 还是 on
   const prefix = isNative ? 'nativeOn:' : 'on:'
   let staticHandlers = ``
   let dynamicHandlers = ``
+  // 遍历属性数组
   for (const name in events) {
+    // 'methodName' 或者 `[method1, method2, ...]` this.methodName
     const handlerCode = genHandler(events[name])
     if (events[name] && events[name].dynamic) {
+      // 存在动态事件的情况，结果为 `eventName, handerCode`
       dynamicHandlers += `${name},${handlerCode},`
     } else {
+      // 静态， 结果为  `eventName, handleCode, ...`
       staticHandlers += `"${name}":${handlerCode},`
     }
   }
+  // 处理最后一个逗号，放到对象里面
   staticHandlers = `{${staticHandlers.slice(0, -1)}}`
   if (dynamicHandlers) {
+    // 动态时， 返回结果为 `on:_d(staticHandlers, [dynamicHandlers])`
     return prefix + `_d(${staticHandlers},[${dynamicHandlers.slice(0, -1)}])`
   } else {
+    // 静态， 直接返回 `on:${staticHandlers}`
     return prefix + staticHandlers
   }
 }

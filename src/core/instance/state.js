@@ -366,15 +366,20 @@ function createWatcher (
   return vm.$watch(expOrFn, handler, options)
 }
 
+// 处理 data 数据， 定义 get 方法， 访问 this._data
 export function stateMixin (Vue: Class<Component>) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
   const dataDef = {}
   dataDef.get = function () { return this._data }
+  // 处理 props
   const propsDef = {}
   propsDef.get = function () { return this._props }
+  // 异常处理
   if (process.env.NODE_ENV !== 'production') {
+    // this.$data = {} or new val 不能直接覆盖
+    // this.$data.newProperty = new val
     dataDef.set = function () {
       warn(
         'Avoid replacing instance root $data. ' +
@@ -382,16 +387,21 @@ export function stateMixin (Vue: Class<Component>) {
         this
       )
     }
+    // 你设置它的时候，直接告诉你 props 是只读的
     propsDef.set = function () {
       warn(`$props is readonly.`, this)
     }
   }
+  // 将 $data 和 $prop 挂载到 Vue 原型链， 支持通过 this.$data 和 this.$props 的方式访问
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
+  // this.$set 和 this.$delete 
+  // Vue.set 和 Vue.delete 的别名
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
 
+  // this.$watch 
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
@@ -415,7 +425,7 @@ export function stateMixin (Vue: Class<Component>) {
       popTarget()
     }
 
-    // 返回一个 unwatch
+    // 返回一个 unwatch 取消 watch 监听
     return function unwatchFn () {
       watcher.teardown()
     }
