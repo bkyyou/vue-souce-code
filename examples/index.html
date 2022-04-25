@@ -11,15 +11,20 @@
     <!-- <div>{{printMsg}}</div>
   <div>{{test()}}</div>
   <div>{{test()}}</div> -->
-    <div id="app" :class="'111'">
+    <!-- <div id="app" :class="'111'">
       <div class="cla">{{msg}}</div>
       <div class="cla">111</div>
-    </div>
+    </div> -->
     <!-- <div  v-for="item in arr" class="cla">{{item}}</div> -->
     <!-- <comp @click="handleClick" v-model="val" :aaa="222"></comp> -->
     <!-- <input type="text" @input="handleInput('aaa', $event.target.value)">
   <div v-pre>{{msg}}</div>
   <div>???msg??? ???</div> -->
+
+    <div id="app">
+      <comp></comp>
+    </div>
+
     <script src="../dist/vue.js"></script>
     <script>
       // const app = document.getElementById("app");
@@ -34,26 +39,28 @@
         //     '1' // 子节点数组
         //   )
         // },
-        template: `
-        <div>
-        <div>{{aaa}}</div>
-        <input :value="value" @input="$emit('input', $event.target.value)">
-        </div>
-      `,
-        props: ["aaa", "value"],
-        mounted() {
-          setTimeout(() => {
-            // this.aaa = 444;
-            // console.log('this', this)
-            // console.log('emit')
-            // this.$emit('click')
-          }, 2000);
-        },
-        methods: {
-          handleClick() {
-            console.log("comp click");
-          },
-        },
+      //   template: `
+      //   <div>
+      //   <div>{{aaa}}</div>
+      //   <input :value="value" @input="$emit('input', $event.target.value)">
+      //   </div>
+      // `,
+      //   props: ["aaa", "value"],
+      //   mounted() {
+      //     setTimeout(() => {
+      //       // this.aaa = 444;
+      //       // console.log('this', this)
+      //       // console.log('emit')
+      //       // this.$emit('click')
+      //     }, 2000);
+      //   },
+      //   methods: {
+      //     handleClick() {
+      //       console.log("comp click");
+      //     },
+      //   },
+
+      template: "<div>comp</div>"
       });
       // Vue.component('comp1', {
       //   name: 'comp2',
@@ -68,44 +75,44 @@
       new Vue({
         el: "#app",
         // delimiters: ["???", "???"],
-        data: {
-          msg: "hello vue",
-          obj: {
-            a: { a: 1 },
-          },
-          arr: [1, 2, 3],
-          val: 0,
-        },
-        computed: {
-          printMsg: function () {
-            console.log("********", "computed");
-            return `${this.msg} computed`;
-          },
-        },
-        methods: {
-          test() {
-            console.log("********", "methods");
-            return `${this.msg} methods`;
-          },
-          handleClick($event) {
-            console.log("handleClick", $event);
-          },
-          handleInput($event) {
-            console.log("hanldInput", arguments);
-          },
-        },
-        mounted() {
-          setTimeout(() => {
-            // debugger
-            // this.obj.a.a = 2;
-            // this.msg = 2;
-            // this.arr.push(2)
-            // this.$set(this, 'a', 1);
-            // console.log('parent');
-            // console.log(this.bus);
-            // this.$emit('click')
-          }, 5000);
-        },
+        // data: {
+        //   msg: "hello vue",
+        //   obj: {
+        //     a: { a: 1 },
+        //   },
+        //   arr: [1, 2, 3],
+        //   val: 0,
+        // },
+        // computed: {
+        //   printMsg: function () {
+        //     console.log("********", "computed");
+        //     return `${this.msg} computed`;
+        //   },
+        // },
+        // methods: {
+        //   test() {
+        //     console.log("********", "methods");
+        //     return `${this.msg} methods`;
+        //   },
+        //   handleClick($event) {
+        //     console.log("handleClick", $event);
+        //   },
+        //   handleInput($event) {
+        //     console.log("hanldInput", arguments);
+        //   },
+        // },
+        // mounted() {
+        //   setTimeout(() => {
+        //     // debugger
+        //     // this.obj.a.a = 2;
+        //     // this.msg = 2;
+        //     // this.arr.push(2)
+        //     // this.$set(this, 'a', 1);
+        //     // console.log('parent');
+        //     // console.log(this.bus);
+        //     // this.$emit('click')
+        //   }, 5000);
+        // },
       });
 
       /**
@@ -186,15 +193,16 @@
       //   obj.key = 1;
       // console.log('obj.key', obj.key);
 
-      // 定投不算
-
-      // 白酒 一只
-      // 医疗 和 医药
-      // 半导体 两只
-      // 光伏 一只
-      // 消费一只
-      // 新能源
-      // 农业
+      
+      // 子组件的渲染过程
+      /*
+        根组件开始初始化，挂载，执行 patch，渲染，
+        碰到子组件，实例化子组件，执行子组件的 $mount, 
+        生成子组件的渲染函数，在之后去挂载这个子组件， 
+        执行他的 updateComponent, 执行他的 render 函数，
+        生成 vnode， 执行 _update, 进入 patch 阶段，
+        子组件渲染到页面上
+      */
     </script>
   </body>
 </html>

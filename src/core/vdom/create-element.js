@@ -44,6 +44,15 @@ export function createElement (
   return _createElement(context, tag, data, children, normalizationType)
 }
 
+/**
+ * 生成 vnode 
+ * @param {上下文} context 
+ * @param {标签} tag 
+ * @param {属性json} data 
+ * @param {子节点} children 
+ * @param {规范化类型} normalizationType 
+ * @returns 
+ */
 export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,
@@ -52,21 +61,26 @@ export function _createElement (
   normalizationType?: number
 ): VNode | Array<VNode> {
   if (isDef(data) && isDef((data: any).__ob__)) {
+    // 属性不能是一个响应式对象
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
       'Always create fresh vnode data objects in each render!',
       context
     )
+    // 如果是一个响应式对象，则返回一个空节点的 vnode
     return createEmptyVNode()
   }
-  // object syntax in v-bind
+  // object syntax in v-bind todo ？？？
   if (isDef(data) && isDef(data.is)) {
     tag = data.is
   }
+  // 标签名不存在， 动态组件 <component :is="comName"></component> comName 是假值
   if (!tag) {
     // in case of component :is set to falsy value
+    // 则返回一个空节点的 vnode
     return createEmptyVNode()
   }
+  // key 唯一键， 必须是一个原始值
   // warn against non-primitive key
   if (process.env.NODE_ENV !== 'production' &&
     isDef(data) && isDef(data.key) && !isPrimitive(data.key)
@@ -80,6 +94,7 @@ export function _createElement (
     }
   }
   // support single function children as default scoped slot
+  // 如果子节点只有一个并且这个子节点是一个函数， 这个子节点当成默认插槽
   if (Array.isArray(children) &&
     typeof children[0] === 'function'
   ) {
@@ -92,10 +107,17 @@ export function _createElement (
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
+
+  /**
+   * 重点开始，前面不需要关注，基本上都是一些异常处理和优化
+   */
   let vnode, ns
+  // 当 tag 是一个字符串时
   if (typeof tag === 'string') {
     let Ctor
+    // 获取命名空间
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    // 是平台保留标签（原生标签）
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn) && data.tag !== 'component') {
@@ -104,23 +126,27 @@ export function _createElement (
           context
         )
       }
+      // 直接实例化 vnode
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
+      // 处理组件， 在 this.$options.components 对象中获取指定组件的构造函数
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
+      // 这个标签不认识，但是也会给他生成 vnode， 在运行时做检查，可能会分配合适的命名空间
       vnode = new VNode(
         tag, data, children,
         undefined, undefined, context
       )
     }
   } else {
+    // 标签不是字符串，他是组件配置对象或者组件的构造函数
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }

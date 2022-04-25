@@ -4,6 +4,8 @@ import { isObject, isDef, hasSymbol } from 'core/util/index'
 
 /**
  * Runtime helper for rendering v-for lists.
+ * 负责生成 v-for 指令所在节点的 vnode
+ * _l(arr, function(val, key, idx){return _c(tag, data, children)})
  */
 export function renderList (
   val: any,
